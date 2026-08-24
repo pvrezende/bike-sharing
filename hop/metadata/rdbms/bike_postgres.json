@@ -1,13 +1,13 @@
 {
   "rdbms": {
     "POSTGRESQL": {
-      "databaseName": "${DB_NAME}",
+      "databaseName": "bike_sharing",
       "pluginId": "POSTGRESQL",
       "accessType": 0,
-      "hostname": "${DB_HOST}",
-      "password": "${DB_PASSWORD}",
+      "hostname": "postgres",
+      "password": "postgres",
       "pluginName": "PostgreSQL",
-      "port": "${DB_PORT}",
+      "port": "5432",
       "attributes": {
         "SUPPORTS_TIMESTAMP_DATA_TYPE": "Y",
         "QUOTE_ALL_FIELDS": "N",
@@ -19,7 +19,7 @@
         "PREFERRED_SCHEMA_NAME": "public"
       },
       "manualUrl": "",
-      "username": "${DB_USER}"
+      "username": "postgres"
     }
   },
   "name": "bike_postgres"

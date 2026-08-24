@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline>
-  <info>
-    <name>02_consolidacao_indicadores</name>
-    <name_sync_with_filename>Y</name_sync_with_filename>
-    <description>Pipeline de consolidação dos principais indicadores do dashboard.</description>
-    <pipeline_type>Normal</pipeline_type>
-    <parameters></parameters>
-  </info>
-  <notepads></notepads>
-  <order>
-    <hop><from>Ler dados tratados</from><to>Calcular KPIs</to><enabled>Y</enabled></hop>
-    <hop><from>Calcular KPIs</from><to>Atualizar tabela indicadores</to><enabled>Y</enabled></hop>
-  </order>
+  <info><name>02_consolidacao_indicadores</name><name_sync_with_filename>Y</name_sync_with_filename>
+    <description>Consolidação real dos KPIs a partir da tabela tratada e UPSERT em bike_indicadores.</description><pipeline_type>Normal</pipeline_type><parameters></parameters></info>
+  <notepads><notepad><note>KPIs NO APACHE HOP: consulta agregada → UPSERT da tabela de indicadores</note><xloc>70</xloc><yloc>35</yloc><width>700</width><height>40</height><fontname>Segoe UI</fontname><fontsize>10</fontsize><fontbold>Y</fontbold><fontitalic>N</fontitalic><fontcolorred>0</fontcolorred><fontcolorgreen>0</fontcolorgreen><fontcolorblue>0</fontcolorblue><backgroundcolorred>230</backgroundcolorred><backgroundcolorgreen>245</backgroundcolorgreen><backgroundcolorblue>255</backgroundcolorblue><bordercolorred>80</bordercolorred><bordercolorgreen>100</bordercolorgreen><bordercolorblue>150</bordercolorblue><drawshadow>Y</drawshadow></notepad></notepads>
+  <order><hop><from>01 - Calcular KPIs</from><to>02 - UPSERT indicadores</to><enabled>Y</enabled></hop></order>
   <transform>
-    <name>Ler dados tratados</name><type>Dummy</type>
-    <description>Origem: tabela public.bike_sharing.</description>
+    <name>01 - Calcular KPIs</name><type>TableInput</type><description>Consulta SQL agregada executada pelo Hop sobre os dados tratados.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>150</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <connection>bike_postgres</connection><sql>SELECT
+  1::integer AS id,
+  SUM(total_locacoes)::bigint AS total_locacoes,
+  ROUND(AVG(total_locacoes)::numeric, 2) AS media_locacoes_hora,
+  (SELECT hora FROM public.bike_sharing GROUP BY hora ORDER BY SUM(total_locacoes) DESC LIMIT 1)::integer AS hora_pico,
+  (SELECT SUM(total_locacoes) FROM public.bike_sharing GROUP BY hora ORDER BY SUM(total_locacoes) DESC LIMIT 1)::bigint AS locacoes_hora_pico,
+  ROUND(100.0 * SUM(CASE WHEN nivel_demanda = 'ALTA' THEN 1 ELSE 0 END) / COUNT(*), 2) AS percentual_alta_demanda,
+  SUM(usuarios_casuais)::bigint AS usuarios_casuais,
+  SUM(usuarios_registrados)::bigint AS usuarios_registrados
+FROM public.bike_sharing</sql><limit>0</limit><lookup/><execute_each_row>N</execute_each_row><variables_active>Y</variables_active>
+    <GUI><xloc>230</xloc><yloc>180</yloc><draw>Y</draw></GUI>
   </transform>
   <transform>
-    <name>Calcular KPIs</name><type>Dummy</type>
-    <description>Total, média por hora, hora de pico, percentual de alta demanda e composição de usuários.</description>
+    <name>02 - UPSERT indicadores</name><type>InsertUpdate</type><description>Atualiza public.bike_indicadores pela chave id=1.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>420</xloc><yloc>150</yloc><draw>Y</draw></GUI>
-  </transform>
-  <transform>
-    <name>Atualizar tabela indicadores</name><type>Dummy</type>
-    <description>Destino: public.bike_indicadores.</description>
-    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>700</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <connection>bike_postgres</connection><commit>10</commit><update_bypassed>N</update_bypassed>
+    <lookup><schema>public</schema><table>bike_indicadores</table>
+      <key><name>id</name><field>id</field><condition>=</condition><name2/></key>
+      <value><name>total_locacoes</name><rename>total_locacoes</rename><update>Y</update></value>
+      <value><name>media_locacoes_hora</name><rename>media_locacoes_hora</rename><update>Y</update></value>
+      <value><name>hora_pico</name><rename>hora_pico</rename><update>Y</update></value>
+      <value><name>locacoes_hora_pico</name><rename>locacoes_hora_pico</rename><update>Y</update></value>
+      <value><name>percentual_alta_demanda</name><rename>percentual_alta_demanda</rename><update>Y</update></value>
+      <value><name>usuarios_casuais</name><rename>usuarios_casuais</rename><update>Y</update></value>
+      <value><name>usuarios_registrados</name><rename>usuarios_registrados</rename><update>Y</update></value>
+    </lookup><GUI><xloc>600</xloc><yloc>180</yloc><draw>Y</draw></GUI>
   </transform>
 </pipeline>

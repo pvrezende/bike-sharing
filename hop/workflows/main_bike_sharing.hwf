@@ -1,38 +1,134 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workflow>
   <name>main_bike_sharing</name>
+  <name_sync_with_filename>N</name_sync_with_filename>
   <description>Workflow principal do Trabalho Final - orquestra ingestão/tratamento, consolidação e validação.</description>
   <extended_description>Fluxo acadêmico: START → ETL → Indicadores → Validação → SUCCESS.</extended_description>
+  <created_user>-</created_user>
+  <modified_user>-</modified_user>
+  <created_date>2026/08/24 19:23:01.646</created_date>
+  <modified_date>2026/08/24 19:23:01.646</modified_date>
   <workflow_version/>
-  <workflow_status>0</workflow_status>
-  <parameters></parameters>
+  <parameters/>
   <actions>
     <action>
-      <name>START</name><description>Início do processo</description><type>SPECIAL</type>
-      <start>Y</start><dummy>N</dummy><repeat>N</repeat>
-      <xloc>100</xloc><yloc>150</yloc>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>START</name>
+      <description>Início do processo</description>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>100</xloc>
+      <yloc>150</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
     </action>
     <action>
-      <name>01 - Ingestão e tratamento</name><description>Executa pipeline principal de ETL.</description><type>PIPELINE</type>
       <filename>${PROJECT_HOME}/pipelines/01_ingestao_tratamento_bike_sharing.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
       <wait_until_finished>Y</wait_until_finished>
-      <xloc>350</xloc><yloc>150</yloc>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>Local</run_configuration>
+      <name>01 - Ingestão e tratamento</name>
+      <description>Executa pipeline principal de ETL.</description>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>336</xloc>
+      <yloc>144</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
     </action>
     <action>
-      <name>02 - Indicadores</name><description>Executa consolidação de indicadores.</description><type>PIPELINE</type>
       <filename>${PROJECT_HOME}/pipelines/02_consolidacao_indicadores.hpl</filename>
+      <params_from_previous>N</params_from_previous>
+      <exec_per_row>N</exec_per_row>
+      <clear_rows>N</clear_rows>
+      <clear_files>N</clear_files>
+      <create_parent_folder>N</create_parent_folder>
+      <set_logfile>N</set_logfile>
+      <set_append_logfile>N</set_append_logfile>
+      <logfile/>
+      <logext/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <loglevel>Basic</loglevel>
       <wait_until_finished>Y</wait_until_finished>
-      <xloc>620</xloc><yloc>150</yloc>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <run_configuration>Local</run_configuration>
+      <name>02 - Indicadores</name>
+      <description>Executa consolidação de indicadores.</description>
+      <type>PIPELINE</type>
+      <attributes/>
+      <xloc>608</xloc>
+      <yloc>144</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
     </action>
     <action>
-      <name>SUCCESS</name><description>Processo concluído</description><type>SPECIAL</type>
-      <start>N</start><dummy>Y</dummy><repeat>N</repeat>
-      <xloc>880</xloc><yloc>150</yloc>
+      <repeat>N</repeat>
+      <schedulerType>0</schedulerType>
+      <intervalSeconds>0</intervalSeconds>
+      <intervalMinutes>60</intervalMinutes>
+      <DayOfMonth>1</DayOfMonth>
+      <weekDay>1</weekDay>
+      <minutes>0</minutes>
+      <hour>12</hour>
+      <doNotWaitOnFirstExecution>N</doNotWaitOnFirstExecution>
+      <name>SUCCESS</name>
+      <description>Processo concluído</description>
+      <type>SPECIAL</type>
+      <attributes/>
+      <xloc>880</xloc>
+      <yloc>150</yloc>
+      <parallel>N</parallel>
+      <attributes_hac/>
     </action>
   </actions>
   <hops>
-    <hop><from>START</from><to>01 - Ingestão e tratamento</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>Y</unconditional></hop>
-    <hop><from>01 - Ingestão e tratamento</from><to>02 - Indicadores</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop>
-    <hop><from>02 - Indicadores</from><to>SUCCESS</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop>
+    <hop>
+      <from>START</from>
+      <to>01 - Ingestão e tratamento</to>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>01 - Ingestão e tratamento</from>
+      <to>02 - Indicadores</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>02 - Indicadores</from>
+      <to>SUCCESS</to>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+      <enabled>Y</enabled>
+    </hop>
   </hops>
+  <notepads/>
+  <attributes/>
 </workflow>

@@ -48,8 +48,6 @@ services:
       postgres:
         condition: service_healthy
 
-  # Interface visual do Apache Hop. O projeto da pasta ./hop fica montado no container.
-  # Se sua máquina não conseguir iniciar hop-web, o restante do projeto continua funcionando.
   hop-web:
     image: apache/hop-web:latest
     container_name: bike_hop_web
@@ -58,8 +56,22 @@ services:
     volumes:
       - ./hop:/files
       - ./dataset:/files/dataset
+      - ./hop/pipelines:/usr/local/tomcat/webapps/ROOT/config/projects/default/pipelines
+      - ./hop/workflows:/usr/local/tomcat/webapps/ROOT/config/projects/default/workflows
+      - ./hop/metadata:/usr/local/tomcat/webapps/ROOT/config/projects/default/metadata
+      - ./dataset:/usr/local/tomcat/webapps/ROOT/config/projects/default/dataset
     environment:
       HOP_LOG_LEVEL: Basic
+      HOP_PROJECT_FOLDER: /files
+      HOP_PROJECT_NAME: bike-sharing
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bike_sharing
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
     profiles: ["hop"]
 
 volumes:

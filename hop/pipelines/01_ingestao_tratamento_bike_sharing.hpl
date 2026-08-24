@@ -3,43 +3,37 @@
   <info>
     <name>01_ingestao_tratamento_bike_sharing</name>
     <name_sync_with_filename>Y</name_sync_with_filename>
-    <description>Pipeline principal: ingestão CSV, validação, transformação, campos derivados e persistência PostgreSQL.</description>
-    <extended_description>Projeto acadêmico Apache Hop - Bike Sharing UCI.</extended_description>
+    <description>ETL real no Apache Hop: leitura CSV, conversão/padronização, regras analíticas, deduplicação e UPSERT no PostgreSQL.</description>
+    <extended_description>Projeto acadêmico Apache Hop - Bike Sharing UCI. Tratamentos executados pelos transforms do Hop.</extended_description>
     <pipeline_type>Normal</pipeline_type>
     <parameters></parameters>
   </info>
   <notepads>
     <notepad>
-      <note>ETL: Dataset público UCI → tratamento → regras analíticas → PostgreSQL</note>
-      <xloc>50</xloc><yloc>30</yloc><width>650</width><height>40</height>
-      <fontname>Segoe UI</fontname><fontsize>10</fontsize><fontbold>N</fontbold><fontitalic>N</fontitalic>
+      <note>ETL NO APACHE HOP: UCI hour.csv → tipos/padronização → campos derivados → deduplicação → UPSERT PostgreSQL</note>
+      <xloc>40</xloc><yloc>25</yloc><width>900</width><height>40</height>
+      <fontname>Segoe UI</fontname><fontsize>10</fontsize><fontbold>Y</fontbold><fontitalic>N</fontitalic>
       <fontcolorred>0</fontcolorred><fontcolorgreen>0</fontcolorgreen><fontcolorblue>0</fontcolorblue>
-      <backgroundcolorred>255</backgroundcolorred><backgroundcolorgreen>255</backgroundcolorgreen><backgroundcolorblue>220</backgroundcolorblue>
-      <bordercolorred>100</bordercolorred><bordercolorgreen>100</bordercolorgreen><bordercolorblue>100</bordercolorblue>
-      <drawshadow>Y</drawshadow>
+      <backgroundcolorred>230</backgroundcolorred><backgroundcolorgreen>255</backgroundcolorgreen><backgroundcolorblue>230</backgroundcolorblue>
+      <bordercolorred>80</bordercolorred><bordercolorgreen>130</bordercolorgreen><bordercolorblue>80</bordercolorblue><drawshadow>Y</drawshadow>
     </notepad>
   </notepads>
   <order>
-    <hop><from>CSV - hour.csv</from><to>Validar e converter tipos</to><enabled>Y</enabled></hop>
-    <hop><from>Validar e converter tipos</from><to>Criar campos derivados</to><enabled>Y</enabled></hop>
-    <hop><from>Criar campos derivados</from><to>Remover duplicidades</to><enabled>Y</enabled></hop>
-    <hop><from>Remover duplicidades</from><to>Persistir PostgreSQL</to><enabled>Y</enabled></hop>
+    <hop><from>01 - Ler CSV UCI</from><to>02 - Padronizar campos</to><enabled>Y</enabled></hop>
+    <hop><from>02 - Padronizar campos</from><to>03 - Regras e campos derivados</to><enabled>Y</enabled></hop>
+    <hop><from>03 - Regras e campos derivados</from><to>04 - Ordenar e remover duplicados</to><enabled>Y</enabled></hop>
+    <hop><from>04 - Ordenar e remover duplicados</from><to>05 - UPSERT PostgreSQL</to><enabled>Y</enabled></hop>
   </order>
   <transform>
-    <name>CSV - hour.csv</name>
-    <type>CSVInput</type>
-    <description>Leitura do dataset público Bike Sharing (hour.csv)</description>
-    <distribute>Y</distribute><copies>1</copies>
-    <partitioning><method>none</method><schema_name/></partitioning>
-    <filename>${DATASET_FILE}</filename>
-    <filename_field/><rownum_field/><include_filename>N</include_filename>
-    <separator>,</separator><enclosure>"</enclosure><header>Y</header>
-    <buffer_size>50000</buffer_size><lazy_conversion>N</lazy_conversion>
-    <add_filename_result>N</add_filename_result><parallel>N</parallel>
-    <newline_possible>N</newline_possible><encoding>UTF-8</encoding>
+    <name>01 - Ler CSV UCI</name><type>CSVInput</type>
+    <description>Leitura tipada do hour.csv. A conversão de tipos já ocorre nesta entrada.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <filename>${PROJECT_HOME}/dataset/hour.csv</filename><filename_field/><rownum_field/><include_filename>N</include_filename>
+    <separator>,</separator><enclosure>"</enclosure><header>Y</header><buffer_size>50000</buffer_size><lazy_conversion>N</lazy_conversion>
+    <add_filename_result>N</add_filename_result><parallel>N</parallel><newline_possible>N</newline_possible><encoding>UTF-8</encoding>
     <fields>
       <field><name>instant</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
-      <field><name>dteday</name><type>String</type><format/><currency/><decimal/><group/><length>10</length><precision>-1</precision><trim_type>both</trim_type></field>
+      <field><name>dteday</name><type>Date</type><format>yyyy-MM-dd</format><currency/><decimal/><group/><length>-1</length><precision>-1</precision><trim_type>both</trim_type></field>
       <field><name>season</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
       <field><name>yr</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
       <field><name>mnth</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
@@ -55,35 +49,120 @@
       <field><name>casual</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
       <field><name>registered</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
       <field><name>cnt</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
-    </fields>
-    <GUI><xloc>100</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    </fields><GUI><xloc>80</xloc><yloc>170</yloc><draw>Y</draw></GUI>
   </transform>
   <transform>
-    <name>Validar e converter tipos</name>
-    <type>Dummy</type>
-    <description>Etapa visual de qualidade: validação de tipos, nulos e campos obrigatórios.</description>
+    <name>02 - Padronizar campos</name><type>SelectValues</type>
+    <description>Seleciona apenas campos necessários e padroniza nomes para o modelo relacional.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>330</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <fields>
+      <field><name>instant</name><rename>instant</rename></field>
+      <field><name>dteday</name><rename>data</rename></field>
+      <field><name>season</name><rename>season</rename></field>
+      <field><name>yr</name><rename>ano</rename></field>
+      <field><name>mnth</name><rename>mes</rename></field>
+      <field><name>hr</name><rename>hora</rename></field>
+      <field><name>holiday</name><rename>feriado</rename></field>
+      <field><name>weekday</name><rename>dia_semana</rename></field>
+      <field><name>workingday</name><rename>dia_util</rename></field>
+      <field><name>weathersit</name><rename>clima</rename></field>
+      <field><name>temp</name><rename>temperatura_normalizada</rename></field>
+      <field><name>atemp</name><rename>sensacao_termica_normalizada</rename></field>
+      <field><name>hum</name><rename>umidade_normalizada</rename></field>
+      <field><name>windspeed</name><rename>vento_normalizado</rename></field>
+      <field><name>casual</name><rename>usuarios_casuais</rename></field>
+      <field><name>registered</name><rename>usuarios_registrados</rename></field>
+      <field><name>cnt</name><rename>total_locacoes</rename></field>
+      <select_unspecified>N</select_unspecified>
+    </fields><GUI><xloc>350</xloc><yloc>170</yloc><draw>Y</draw></GUI>
   </transform>
   <transform>
-    <name>Criar campos derivados</name>
-    <type>Dummy</type>
-    <description>Regras: periodo_dia, nivel_demanda, descricao_clima e descricao_estacao.</description>
+    <name>03 - Regras e campos derivados</name><type>ScriptValueMod</type>
+    <description>Cria periodo_dia, nivel_demanda, descrições de clima/estação e converte flags para Boolean.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>560</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts><jsScript><jsScript_type>0</jsScript_type><jsScript_name>Regras Bike Sharing</jsScript_name><jsScript_script>// Regras analíticas executadas dentro do Apache Hop
+// Faixas de demanda calculadas previamente sobre o dataset UCI (quantis 33% e 66%): 69 e 221.
+feriado = (feriado == 1);
+dia_util = (dia_util == 1);
+
+if (hora &gt;= 0 &amp;&amp; hora &lt;= 5) {
+  periodo_dia = "MADRUGADA";
+} else if (hora &lt;= 11) {
+  periodo_dia = "MANHA";
+} else if (hora &lt;= 17) {
+  periodo_dia = "TARDE";
+} else {
+  periodo_dia = "NOITE";
+}
+
+if (total_locacoes &lt;= 69) {
+  nivel_demanda = "BAIXA";
+} else if (total_locacoes &lt;= 221) {
+  nivel_demanda = "MEDIA";
+} else {
+  nivel_demanda = "ALTA";
+}
+
+switch (clima) {
+  case 1: descricao_clima = "LIMPO_POUCAS_NUVENS"; break;
+  case 2: descricao_clima = "NEVOA_NUBLADO"; break;
+  case 3: descricao_clima = "CHUVA_NEVE_LEVE"; break;
+  case 4: descricao_clima = "CONDICAO_SEVERA"; break;
+  default: descricao_clima = "OUTRO";
+}
+
+switch (season) {
+  case 1: descricao_estacao = "PRIMAVERA"; break;
+  case 2: descricao_estacao = "VERAO"; break;
+  case 3: descricao_estacao = "OUTONO"; break;
+  case 4: descricao_estacao = "INVERNO"; break;
+  default: descricao_estacao = "OUTRA";
+}</jsScript_script></jsScript></jsScripts>
+    <fields>
+      <field><name>feriado</name><rename>feriado</rename><type>Boolean</type><length>-1</length><precision>-1</precision><replace>Y</replace></field>
+      <field><name>dia_util</name><rename>dia_util</rename><type>Boolean</type><length>-1</length><precision>-1</precision><replace>Y</replace></field>
+      <field><name>periodo_dia</name><rename>periodo_dia</rename><type>String</type><length>20</length><precision>-1</precision><replace>N</replace></field>
+      <field><name>nivel_demanda</name><rename>nivel_demanda</rename><type>String</type><length>20</length><precision>-1</precision><replace>N</replace></field>
+      <field><name>descricao_clima</name><rename>descricao_clima</rename><type>String</type><length>80</length><precision>-1</precision><replace>N</replace></field>
+      <field><name>descricao_estacao</name><rename>descricao_estacao</rename><type>String</type><length>30</length><precision>-1</precision><replace>N</replace></field>
+    </fields><GUI><xloc>620</xloc><yloc>170</yloc><draw>Y</draw></GUI>
   </transform>
   <transform>
-    <name>Remover duplicidades</name>
-    <type>Dummy</type>
-    <description>Controle por instant. A carga Docker usa UPSERT para reprocessamento idempotente.</description>
+    <name>04 - Ordenar e remover duplicados</name><type>SortRows</type>
+    <description>Ordena pela chave instant e elimina chaves duplicadas antes da persistência.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>790</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <directory>${java.io.tmpdir}</directory><prefix>bike-sort</prefix><sort_size>100000</sort_size><free_memory/><compress>N</compress><compress_variable/><unique_rows>Y</unique_rows>
+    <fields><field><name>instant</name><ascending>Y</ascending><case_sensitive>N</case_sensitive><collator_enabled>N</collator_enabled><collator_strength>0</collator_strength><presorted>N</presorted></field></fields>
+    <GUI><xloc>900</xloc><yloc>170</yloc><draw>Y</draw></GUI>
   </transform>
   <transform>
-    <name>Persistir PostgreSQL</name>
-    <type>Dummy</type>
-    <description>Persistência final no banco bike_sharing. Conexão metadata: bike_postgres.</description>
+    <name>05 - UPSERT PostgreSQL</name><type>InsertUpdate</type>
+    <description>Insert/Update real em public.bike_sharing usando instant como chave. Reexecução idempotente.</description>
     <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
-    <GUI><xloc>1020</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+    <connection>bike_postgres</connection><commit>1000</commit><update_bypassed>N</update_bypassed>
+    <lookup><schema>public</schema><table>bike_sharing</table>
+      <key><name>instant</name><field>instant</field><condition>=</condition><name2/></key>
+      <value><name>data</name><rename>data</rename><update>Y</update></value>
+      <value><name>season</name><rename>season</rename><update>Y</update></value>
+      <value><name>ano</name><rename>ano</rename><update>Y</update></value>
+      <value><name>mes</name><rename>mes</rename><update>Y</update></value>
+      <value><name>hora</name><rename>hora</rename><update>Y</update></value>
+      <value><name>feriado</name><rename>feriado</rename><update>Y</update></value>
+      <value><name>dia_semana</name><rename>dia_semana</rename><update>Y</update></value>
+      <value><name>dia_util</name><rename>dia_util</rename><update>Y</update></value>
+      <value><name>clima</name><rename>clima</rename><update>Y</update></value>
+      <value><name>temperatura_normalizada</name><rename>temperatura_normalizada</rename><update>Y</update></value>
+      <value><name>sensacao_termica_normalizada</name><rename>sensacao_termica_normalizada</rename><update>Y</update></value>
+      <value><name>umidade_normalizada</name><rename>umidade_normalizada</rename><update>Y</update></value>
+      <value><name>vento_normalizado</name><rename>vento_normalizado</rename><update>Y</update></value>
+      <value><name>usuarios_casuais</name><rename>usuarios_casuais</rename><update>Y</update></value>
+      <value><name>usuarios_registrados</name><rename>usuarios_registrados</rename><update>Y</update></value>
+      <value><name>total_locacoes</name><rename>total_locacoes</rename><update>Y</update></value>
+      <value><name>periodo_dia</name><rename>periodo_dia</rename><update>Y</update></value>
+      <value><name>nivel_demanda</name><rename>nivel_demanda</rename><update>Y</update></value>
+      <value><name>descricao_clima</name><rename>descricao_clima</rename><update>Y</update></value>
+      <value><name>descricao_estacao</name><rename>descricao_estacao</rename><update>Y</update></value>
+    </lookup><GUI><xloc>1190</xloc><yloc>170</yloc><draw>Y</draw></GUI>
   </transform>
 </pipeline>
