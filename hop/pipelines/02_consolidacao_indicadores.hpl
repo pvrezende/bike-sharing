@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline>
+  <info>
+    <name>02_consolidacao_indicadores</name>
+    <name_sync_with_filename>Y</name_sync_with_filename>
+    <description>Pipeline de consolidação dos principais indicadores do dashboard.</description>
+    <pipeline_type>Normal</pipeline_type>
+    <parameters></parameters>
+  </info>
+  <notepads></notepads>
+  <order>
+    <hop><from>Ler dados tratados</from><to>Calcular KPIs</to><enabled>Y</enabled></hop>
+    <hop><from>Calcular KPIs</from><to>Atualizar tabela indicadores</to><enabled>Y</enabled></hop>
+  </order>
+  <transform>
+    <name>Ler dados tratados</name><type>Dummy</type>
+    <description>Origem: tabela public.bike_sharing.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>150</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Calcular KPIs</name><type>Dummy</type>
+    <description>Total, média por hora, hora de pico, percentual de alta demanda e composição de usuários.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>420</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Atualizar tabela indicadores</name><type>Dummy</type>
+    <description>Destino: public.bike_indicadores.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>700</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+</pipeline>

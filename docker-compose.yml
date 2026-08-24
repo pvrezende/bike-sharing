@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bike_postgres
+    environment:
+      POSTGRES_DB: bike_sharing
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bike_sharing"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  etl:
+    build: ./etl
+    container_name: bike_etl
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bike_sharing
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DATA_URL: https://archive.ics.uci.edu/static/public/275/bike+sharing+dataset.zip
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./dataset:/app/dataset
+
+  dashboard:
+    build: ./dashboard
+    container_name: bike_dashboard
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bike_sharing
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - "8501:8501"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Interface visual do Apache Hop. O projeto da pasta ./hop fica montado no container.
+  # Se sua máquina não conseguir iniciar hop-web, o restante do projeto continua funcionando.
+  hop-web:
+    image: apache/hop-web:latest
+    container_name: bike_hop_web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./hop:/files
+      - ./dataset:/files/dataset
+    environment:
+      HOP_LOG_LEVEL: Basic
+    profiles: ["hop"]
+
+volumes:
+  postgres_data:

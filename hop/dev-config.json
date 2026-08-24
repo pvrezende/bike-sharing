@@ -1,0 +1,34 @@
+{
+  "variables": [
+    {
+      "name": "DB_HOST",
+      "value": "postgres",
+      "description": "Host PostgreSQL no Docker"
+    },
+    {
+      "name": "DB_PORT",
+      "value": "5432",
+      "description": "Porta PostgreSQL"
+    },
+    {
+      "name": "DB_NAME",
+      "value": "bike_sharing",
+      "description": "Banco"
+    },
+    {
+      "name": "DB_USER",
+      "value": "postgres",
+      "description": "Usu\u00e1rio"
+    },
+    {
+      "name": "DB_PASSWORD",
+      "value": "postgres",
+      "description": "Senha"
+    },
+    {
+      "name": "DATASET_FILE",
+      "value": "${PROJECT_HOME}/dataset/hour.csv",
+      "description": "Arquivo de origem"
+    }
+  ]
+}

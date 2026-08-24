@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow>
+  <name>main_bike_sharing</name>
+  <description>Workflow principal do Trabalho Final - orquestra ingestão/tratamento, consolidação e validação.</description>
+  <extended_description>Fluxo acadêmico: START → ETL → Indicadores → Validação → SUCCESS.</extended_description>
+  <workflow_version/>
+  <workflow_status>0</workflow_status>
+  <parameters></parameters>
+  <actions>
+    <action>
+      <name>START</name><description>Início do processo</description><type>SPECIAL</type>
+      <start>Y</start><dummy>N</dummy><repeat>N</repeat>
+      <xloc>100</xloc><yloc>150</yloc>
+    </action>
+    <action>
+      <name>01 - Ingestão e tratamento</name><description>Executa pipeline principal de ETL.</description><type>PIPELINE</type>
+      <filename>${PROJECT_HOME}/pipelines/01_ingestao_tratamento_bike_sharing.hpl</filename>
+      <wait_until_finished>Y</wait_until_finished>
+      <xloc>350</xloc><yloc>150</yloc>
+    </action>
+    <action>
+      <name>02 - Indicadores</name><description>Executa consolidação de indicadores.</description><type>PIPELINE</type>
+      <filename>${PROJECT_HOME}/pipelines/02_consolidacao_indicadores.hpl</filename>
+      <wait_until_finished>Y</wait_until_finished>
+      <xloc>620</xloc><yloc>150</yloc>
+    </action>
+    <action>
+      <name>SUCCESS</name><description>Processo concluído</description><type>SPECIAL</type>
+      <start>N</start><dummy>Y</dummy><repeat>N</repeat>
+      <xloc>880</xloc><yloc>150</yloc>
+    </action>
+  </actions>
+  <hops>
+    <hop><from>START</from><to>01 - Ingestão e tratamento</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>Y</unconditional></hop>
+    <hop><from>01 - Ingestão e tratamento</from><to>02 - Indicadores</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop>
+    <hop><from>02 - Indicadores</from><to>SUCCESS</to><from_nr>0</from_nr><to_nr>0</to_nr><enabled>Y</enabled><evaluation>Y</evaluation><unconditional>N</unconditional></hop>
+  </hops>
+</workflow>

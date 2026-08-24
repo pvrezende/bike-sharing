@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline>
+  <info>
+    <name>01_ingestao_tratamento_bike_sharing</name>
+    <name_sync_with_filename>Y</name_sync_with_filename>
+    <description>Pipeline principal: ingestão CSV, validação, transformação, campos derivados e persistência PostgreSQL.</description>
+    <extended_description>Projeto acadêmico Apache Hop - Bike Sharing UCI.</extended_description>
+    <pipeline_type>Normal</pipeline_type>
+    <parameters></parameters>
+  </info>
+  <notepads>
+    <notepad>
+      <note>ETL: Dataset público UCI → tratamento → regras analíticas → PostgreSQL</note>
+      <xloc>50</xloc><yloc>30</yloc><width>650</width><height>40</height>
+      <fontname>Segoe UI</fontname><fontsize>10</fontsize><fontbold>N</fontbold><fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred><fontcolorgreen>0</fontcolorgreen><fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred><backgroundcolorgreen>255</backgroundcolorgreen><backgroundcolorblue>220</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred><bordercolorgreen>100</bordercolorgreen><bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+  </notepads>
+  <order>
+    <hop><from>CSV - hour.csv</from><to>Validar e converter tipos</to><enabled>Y</enabled></hop>
+    <hop><from>Validar e converter tipos</from><to>Criar campos derivados</to><enabled>Y</enabled></hop>
+    <hop><from>Criar campos derivados</from><to>Remover duplicidades</to><enabled>Y</enabled></hop>
+    <hop><from>Remover duplicidades</from><to>Persistir PostgreSQL</to><enabled>Y</enabled></hop>
+  </order>
+  <transform>
+    <name>CSV - hour.csv</name>
+    <type>CSVInput</type>
+    <description>Leitura do dataset público Bike Sharing (hour.csv)</description>
+    <distribute>Y</distribute><copies>1</copies>
+    <partitioning><method>none</method><schema_name/></partitioning>
+    <filename>${DATASET_FILE}</filename>
+    <filename_field/><rownum_field/><include_filename>N</include_filename>
+    <separator>,</separator><enclosure>"</enclosure><header>Y</header>
+    <buffer_size>50000</buffer_size><lazy_conversion>N</lazy_conversion>
+    <add_filename_result>N</add_filename_result><parallel>N</parallel>
+    <newline_possible>N</newline_possible><encoding>UTF-8</encoding>
+    <fields>
+      <field><name>instant</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>dteday</name><type>String</type><format/><currency/><decimal/><group/><length>10</length><precision>-1</precision><trim_type>both</trim_type></field>
+      <field><name>season</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>yr</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>mnth</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>hr</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>2</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>holiday</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>1</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>weekday</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>1</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>workingday</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>1</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>weathersit</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>1</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>temp</name><type>Number</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>5</precision><trim_type>none</trim_type></field>
+      <field><name>atemp</name><type>Number</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>5</precision><trim_type>none</trim_type></field>
+      <field><name>hum</name><type>Number</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>5</precision><trim_type>none</trim_type></field>
+      <field><name>windspeed</name><type>Number</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>5</precision><trim_type>none</trim_type></field>
+      <field><name>casual</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>registered</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
+      <field><name>cnt</name><type>Integer</type><format/><currency/><decimal>.</decimal><group>,</group><length>10</length><precision>0</precision><trim_type>none</trim_type></field>
+    </fields>
+    <GUI><xloc>100</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Validar e converter tipos</name>
+    <type>Dummy</type>
+    <description>Etapa visual de qualidade: validação de tipos, nulos e campos obrigatórios.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>330</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Criar campos derivados</name>
+    <type>Dummy</type>
+    <description>Regras: periodo_dia, nivel_demanda, descricao_clima e descricao_estacao.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>560</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Remover duplicidades</name>
+    <type>Dummy</type>
+    <description>Controle por instant. A carga Docker usa UPSERT para reprocessamento idempotente.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>790</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+  <transform>
+    <name>Persistir PostgreSQL</name>
+    <type>Dummy</type>
+    <description>Persistência final no banco bike_sharing. Conexão metadata: bike_postgres.</description>
+    <distribute>Y</distribute><copies>1</copies><partitioning><method>none</method><schema_name/></partitioning>
+    <GUI><xloc>1020</xloc><yloc>150</yloc><draw>Y</draw></GUI>
+  </transform>
+</pipeline>
